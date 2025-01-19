@@ -83,6 +83,68 @@ while(list!=NULL)
     list=tmp;
 }
 ```
+实际上，我们可以使用循环来完成链表的构建
+以下是使用循环的构建
+```
+#include<stdio.h>
+#include<stdlib.h>
+typedef struct node
+{
+    int date;
+    struct node *next;
+} node;
+
+int main()
+{
+    struct node *p;
+    struct node *head;//头节点
+    struct node *tail;//尾节点
+    p = (struct node*) malloc(sizeof(node));//给p分配内存空间
+    head = p;//头节点指向p
+    tail = p;//尾节点指向p
+    head->next = NULL;
+    int n;
+    scanf("%d", &n);
+    for (int i = 0; i < n;i++)//创建链表
+    {
+        p = (struct node*) malloc(sizeof(node));
+        scanf("%d", &p->date);
+        tail->next = p;//尾节点只想了p
+        tail = p;//更新尾节点
+        tail->next = NULL;
+    }
+    //增加节点(假设数据为3)
+    struct node *q;
+    q = (struct node *)malloc(sizeof(node));
+    q->date = 3;
+    p = head;
+    while(p!=NULL)
+    {
+        if(p->next->date>q->date)
+        {
+            q->next = p->next;
+            p->next = q;
+            break;
+        }
+        p = p->next;
+    }
+    //删除节点
+    int x = 3;
+    p = head;
+    while(p!=NULL)
+    {
+        if(p->next->date==x)
+        {
+            struct node *tmp;
+            tmp = p->next;
+            p->next = p->next->next;
+            free tmp;
+            break;
+        }
+        p = p->next;
+    }
+}
+```
 ## python
 - 使用`for`循环
 ```

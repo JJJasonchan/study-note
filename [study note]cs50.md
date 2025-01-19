@@ -2,6 +2,8 @@
 ## 算法 algorithms
 在描述算法的效率是，可以使用*O*和Ω
 *o*表示算法速度的上限，Ω表示算法速度的下限
+## 数据结构  Data Structure
+- array数组
 ## python
 - 使用`for`循环
 ```

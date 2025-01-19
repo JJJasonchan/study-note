@@ -3,7 +3,86 @@
 在描述算法的效率是，可以使用*O*和Ω
 *o*表示算法速度的上限，Ω表示算法速度的下限
 ## 数据结构  Data Structure
-- array数组
+- array数组，动态的分配数组内存，可以使用`malloc`函数动态分配内存
+```
+int *array=(int)malloc(n*sizeof(int));//分配内存地址
+if(array==NULL)
+{
+    printf("分配失败);
+    return 1;
+}
+```
+清除内存可以是用`free`
+```
+free(array);
+```
+> 注意，使用以上函数需要引入`stdlib.h`头文件
+>
+- linked lists 链表，链表主要构造是每个节点（node）分配两倍的内存，一个用来存放数据，一个存放下一个数据的指针
+> 对比数组能更灵活分配数组大小
+> 缺点是无法精准的定位某一位数字，只能一次遍历每一个数字
+>
+创建链表
+```
+typedef struct node
+{
+    int number;
+    struct node *next;//下一个节点的内存
+}node;
+```
+定义链表list of size 0
+```
+node *list=NULL
+```
+在列表中加入数字
+```
+node *n=malloc(sizeof(node));
+if(n==NULL)
+{
+    return 1;
+}
+n->number=1;
+n->next=NULL;
+list=n;//作为链表的开头
+```
+链接新加的数字
+```
+node *n=malloc(sizeof(node));
+if(n==NULL)
+{
+    return 1;
+}
+n->number=2;
+n->next=NULL;
+list->next=n;
+```
+假如继续加节点
+```
+ode *n=malloc(sizeof(node));
+if(n==NULL)
+{
+    return 1;
+}
+n->number=3;
+n->next=NULL;
+list->next->next=n;//这里是链接前面的节点，建议使用循环
+```
+遍历链表
+```
+for(node *tmp=list;tmp!=NULL;tmp=tmp->next)
+{
+    printf("%i",tmp->number);
+}
+```
+释放链表list
+```
+while(list!=NULL)
+{
+    node *tmp=list->next;
+    free(list);
+    list=tmp;
+}
+```
 ## python
 - 使用`for`循环
 ```

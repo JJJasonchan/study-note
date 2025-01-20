@@ -34,11 +34,11 @@
   - 局部变量
   - `const`修饰的局部变量
 
-> 局部变量:在函数中定义的变量(包括在`main`函数中的变量)
+> 局部变量:在函数中定义的变量(包括在`main`函数中的变量)[栈区]
 >
-> 全局变量:不在函数中的变量
+> 全局变量:不在函数中的变量[全局区]
 >
-> 静态变量:在局部变量前加`static`
+> 静态变量:在局部变量前加`static`[全局区]
 >
 > 常量: 
 >
@@ -56,7 +56,8 @@
 
 #### 堆区
 
-- *程序员*分配释放,程序结束由操作系统回收
+> 程序员*分配释放,程序结束由操作系统回收
+
 - C++中利用[`new`](####new操作符)在堆区开辟内存
 
 在堆区开辟数据
@@ -237,7 +238,7 @@ int main()
    }
    ```
 
-2. 函数返回的是引用,函数的调用可以==作为左值==,可以直接操作函数中返回的变量.
+2. 函数**返回的是引用**,函数的调用可以==作为左值==,可以直接操作函数中返回的变量.
 
 ```c++
 #include<iostream>
@@ -489,7 +490,7 @@ person(int a)
   ```
 
   - `person(10)`是匿名对象,当前执行结束后,系统会立刻回收匿名对象
-  -  不要用拷贝构造函数初始化匿名对象,编译器会认为`person (p3)===person p3;`
+  -  不要用拷贝构造函数初始化匿名对象,编译器会认为`person (p3)==person p3;`
 
 - 隐式转换法
 
@@ -595,4 +596,176 @@ person(const person &p1)
   height=p1.heighet;//直接赋值拷贝
 }
 ```
+
+#### 初始化列表
+
+作用：C++提供的初始化列表的语法，用来初始化属性
+
+语法：`构造函数():属性1(值1),属性2(值2),属性3(值3)…..{}`
+
+Eg :
+
+```c++
+#include<iostream>
+using namespace std;
+class person
+{
+    public:
+        int a;
+        int b;
+        int c;
+        person(int p1,int p2,int p3):a(p1),b(p2),c(p3)
+        {
+
+        }
+};
+int main()
+{
+    person p(100, 2, 3);
+    cout << p.a << endl;
+    cout << p.b << endl;
+    cout << p.c << endl;
+}
+```
+
+#### 类对象作为类成员
+
+在C++中，类的成员可以是另一个类的对象（类的嵌套）
+
+Eg
+
+```c++
+#include<iostream>
+#include<string>
+using namespace std;
+class phone
+{
+    public:
+    phone(string name):PhoneName(name)
+    {
+
+    }
+    string PhoneName;
+};
+class person
+{
+    public:
+    person(string p_name,string phonename):name(p_name),ph(phonename)//注意这里构造函数中传入的数据要与嵌套的类的成员数据类型相匹配
+    {
+       
+    }
+    string name;
+    phone ph;
+};
+
+int main()
+{
+    person p("jason", "iphone");
+    cout << p.name <<" use "<<p.ph.PhoneName <<endl;
+}
+```
+
+需要注意的是，当构造函数传入的数据类型要和嵌套的类中成员的数据类型匹配，如这里的`phone`的`PhoneName`数据类型是字符串，那么当`person`的构造函数传入的数据就要和`PhoneName`相匹配.
+
+当其他类对象作为本类的成员时，构造时候**先构造类对象**，再构造自身。**构造与析构顺序相反**
+
+#### 静态成员
+
+> 静态成员是在成员变量和成员函数前面加上`static`关键字
+
+- **静态成员变量**特点：
+  - 所有成员共享同一份数据
+  - 编译阶段分配内存
+  - 类内声明，类外初始化
+
+Eg 
+
+```c++
+class person
+{
+    public:
+        static int m_a;//类内声明
+};
+int person::m_a = 10;//此处是类外初始化
+```
+
+静态成员变量有两种访问方式：
+
+- 通过对象进行访问
+
+```c++
+person p;
+cout << p.m_a << endl;
+```
+
+- 通过类名进行访问
+
+```c++
+cout << person::m_a << endl;
+```
+
+所有成员共享同一份数据
+
+```c++
+person p2;
+    p2.m_a = 20;
+    cout << p2.m_a << endl;//输出：20
+    cout << p.m_a << endl;//输出：20
+```
+
+静态成员变量也可以划分权限
+
+```c++
+ private:
+        static int m_b;//私有权限外部访问不到
+```
+
+- **静态成员函数**的特点
+  1. 程序共享一个函数
+  2. 静态成员只能访问静态成员变量，不能访问局部成员变量
+  3. 静态成员变量是可以设置访问权限的
+
+```c++
+class person
+{
+    public:
+        static int m_a;
+        static void fuc()//静态全局变量
+        {
+            m_a = 20000;
+            cout << "静态成员函数调用" << endl;
+            cout << m_a << endl;
+        }
+};
+```
+
+访问静态成员变量的两种方式：
+
+- 通过对象访问
+
+```c++
+person p;
+    p.fuc();
+```
+
+- 通过类名访问
+
+```c++
+person::fuc();
+```
+
+  #### 类的成员变量和成员函数的存储
+
+在C++中，类内的成员变量和成员函数是分开存储的
+
+1. **非静态成员变量**储存在类内
+2. 静态成员变量/静态成员函数/非静态成员函数都是存储在类外 
+
+#### this指针使用
+
+> C++对象中成员变量与函数是分开储存的，所有对象共用一个成员函数
+
+C++提供特殊的对象指针–`this`指针，通过this指针解决调用函数指向问题，**`this`指针指向被调用的成员函数所属的对象**（谁调用函数就指向谁）
+
+
 

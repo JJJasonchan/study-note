@@ -582,7 +582,7 @@ person(int a)
 //拷贝构造函数
     person(const person &p1)
     {
-        age = p1.age;
+         age = p1.age;
         heighet = new int(*p1.heighet);//深拷贝,重新在堆区开辟一片内存存放拷贝的数据
     }
 ```
@@ -597,7 +597,7 @@ person(const person &p1)
 }
 ```
 
-#### 初始化列表
+### 初始化列表
 
 作用：C++提供的初始化列表的语法，用来初始化属性
 
@@ -628,7 +628,7 @@ int main()
 }
 ```
 
-#### 类对象作为类成员
+### 类对象作为类成员
 
 在C++中，类的成员可以是另一个类的对象（类的嵌套）
 
@@ -669,7 +669,7 @@ int main()
 
 当其他类对象作为本类的成员时，构造时候**先构造类对象**，再构造自身。**构造与析构顺序相反**
 
-#### 静态成员
+### 静态成员
 
 > 静态成员是在成员变量和成员函数前面加上`static`关键字
 
@@ -754,7 +754,7 @@ person p;
 person::fuc();
 ```
 
-  #### 类的成员变量和成员函数的存储
+  ### 类的成员变量和成员函数的存储
 
 在C++中，类内的成员变量和成员函数是分开存储的
 
@@ -765,7 +765,508 @@ person::fuc();
 
 > C++对象中成员变量与函数是分开储存的，所有对象共用一个成员函数
 
-C++提供特殊的对象指针–`this`指针，通过this指针解决调用函数指向问题，**`this`指针指向被调用的成员函数所属的对象**（谁调用函数就指向谁）
+C++提供特殊的对象指针–`this`指针，通过this指针解决调用函数指向问题，**`this`指针指向被调用的成员函数所属的对象**（谁调用函数就指向谁）`this`指针是隐含每一个非静态成员函数中的一种指针，不需要定义。
+
+> `this`指针本质上是指针常量（`person* const this`),其指向是不能被修改的
+
+应用application：
+
+1. 当函数形参和成员变量相同时，可以用this指针区分
+
+   ```c++
+   class person
+   {
+       public:
+           
+           person(int age)
+           {
+               //解决同名变量的问题
+               this->age = age;//这里指针指回了调用函数的对象
+           }
+           int age;
+   };
+   ```
+
+   当然，推荐成员变量命名遵循`m_xx`的规则。避免出现变量名重复。
+
+2. 在类的非静态成员函数中返回对象本身，可以使用`return *this`
+
+   ```c++
+   class person
+   {
+       public:
+           
+           person(int age)
+           {
+               //解决同名变量的问题
+               m_age = age;
+           }
+           int m_age;
+           person& Addage(person &p)//通过引用的方式传入对象本身
+           {
+               m_age += p.m_age;
+               return *this;//返回对象本身
+           }
+   };
+   ```
+
+   在C++中，成员函数可以进行链式编程
+
+   ```c++
+   p.Addage(p2).Addage(p2).Addage(p2).Addage(p2);
+   ```
+
+   这里因为函数返回了对象本身，使用可以重复调用函数。
+   
+   - 空指针可以访问成员函数。但是当函数调用了成员属性，那么要在函数前面加上判断指针是否为空指针，防止程序崩溃。
+     ```c++
+      if(this==NULL)
+     {
+          return 1;
+     }
+     ```
+
+### const修饰的成员函数（常函数）
+
+在C++中，const表示只读状态，不能被修改。在成员函数后添加`const`修饰，**成员变量的值是不能被修改的。**
+
+```c++
+class person
+{
+    public:
+        int m_a;
+        person(int a)
+        {
+            m_a = a;
+        }
+        void func()const
+        {
+            m_a = 100//成员变量不能被修改 
+        }
+};
+```
+
+成员函数后面加上`const`,修饰的是`this`的指向，让`this`指向的值不能修改
+
+```c++
+this==const person* const this
+```
+
+那么如果想要修改成员变量，需要在要修改的成员变量前面加上` mutable`
+
+```c++
+ mutable int m_a;
+```
+
+### 常对象
+
+> 在对象前面加上`const`变成常对象。常对象不允许修改成员变量
+
+```c++
+const person p;
+```
+
+常对象可以修改带有`mutable`修饰的成员变量
+
+常对象只能调用常函数，但是不能访问普通的函数
+
+### 友元
+
+> 只允许特定的函数或类访问另一个类的私有成–友元
+
+友元的关键字：`friend`
+
+实现友元的三个方式
+
+1. 全局函数做友元
+2. 类做友元
+3. 成员函数做友元
+
+---
+
+- 全局函数作友元
+  把全局函数在类内声明，并加上`friend`关键字即可
+
+```c++
+class building
+{
+    //通过友元全局函数能访问对象的私有属性
+    friend void func(building *Myhome);
+
+public:
+    string LivingRoom;
+    building()
+    {
+        LivingRoom = "客厅";
+        BedRoom = "房间";
+        }
+
+    private:
+        string BedRoom;//私有属性
+};
+//全局函数访问私有权限的属性
+void func(building *Myhome)
+{
+    cout << "现在访问的是： " << Myhome->BedRoom<< endl;
+}
+```
+
+- 类作为友元
+  类声明在另一个类并加上`friend`
+
+```c++
+lass building
+{
+    friend class Goodfriend;//通过友元使类可以访问类的隐私权限
+
+public:
+    string LivingRoom;
+    building()
+    {
+        LivingRoom = "客厅";
+        BedRoom = "房间";
+    }
+
+    private:
+        string BedRoom;
+};
+class Goodfriend
+{
+    public: 
+    Goodfriend(string name)
+    {
+        m_name = name;
+    }
+    string m_name;
+   
+    void visit(building *building)
+    {
+        cout << "good friend is visiting " << building->BedRoom << endl;
+    }
+};
+```
+
+- 成员函数做友元
+
+```c++
+// 将 Goodfriend::visit 声明为友元函数
+    friend void Goodfriend::visit(building *bd);
+```
+
+### 运算符重载
+
+> C++中定义了新的对象，拓展运算符的使用范围，而不局限于编译器原有的操作，可以使用运算符重载。可以拓宽运算符的操作范围
+
+运算符重载可以函数重载（即可以同时支持多种数据类型相加的情况）
+
+#### 加号运算符重载
+
+运算符重载可以有两种方式，一个是全局函数实现运算符重载，一个是成员函数的方式
+
+1. 全局函数实现运算符重载
+   ```c++
+   class person;
+   person operator+(person &p1, person &p2)
+   {
+       person temp;
+       temp.m_a = p1.m_a + p2.m_a;
+       temp.m_b = p1.m_b + p2.m_b;
+       return temp;
+   }
+   ```
+
+   重载后就可以实现对象相加`person p3=p1+p2`.本质为：`person p3=operator+(p1,p2)`
+
+2. 成员函数实现运算符重载
+   ```c++
+   class person
+   {
+       public:
+           int m_a;
+           int m_b;
+           
+           成员加号运算符重载
+           person operator+(person &p)
+           {
+               person temp;
+               temp.m_a = this->m_a + p.m_a;
+               temp.m_b = this->m_b + p.m_b;
+               return temp;
+           }
+   };
+   ```
+
+   重载后就可以实现对象相加`person p3=p1+p2`.本质为：`person p3=p1.operator+(&p2)`
+
+#### 左移运算符重载<<
+
+   左移运算符一般是用全局函数重载,确保`cout`在左边
+
+```c++
+//对左移运算符进行重载
+  ostream& operator<<(ostream &cout, const person &p)//引用cout和结构体
+  {
+      cout << p.m_a << ", " << p.m_b << endl;
+      return cout;
+  }
+```
+
+`cout`的数据类型是`ostream`，函数需要返回`cout`使得输出可以连续链接。一般类的属性是`private`,需要在类内使用友元该全局函数重载运算符。
+
+#### **自增（减）运算符(成员函数重载)**
+
+- 前置运算符,直接对数据本身加减
+  ```c++
+  myint& operator++()//前置递增
+      {
+          ++ m_a;
+          return *this;//返回数据本身
+      }
+  ```
+
+- 后置运算符，先返回原本的值在元算
+  ```c++
+  //后置递增
+      myint operator++(int)//后置递增
+      {
+          //先记录原本数据
+          myint temp = *this;
+          //再递增
+          this->m_a++;
+          return temp;//返回数据原本的值就可以了
+      }
+  ```
+
+  `myint operator++(int)`通过`int`占位参数区分前置/后置占位符。
+
+  #### 赋值运算符重载
+  
+  C++编译器会默认给类添加4个函数
+  
+  1. 默认构造函数（无参，函数体为空）
+  2. 默认析构函数（无参，函数体为空）
+  3. 默认拷贝构造函数，对属性进行值拷贝
+  4. 赋值运算符`operator=`对属性进行值拷贝（浅拷贝）
+
+当类中属性指向堆区，赋值操作会出现[深浅拷贝](#深拷贝和浅拷贝)的问题
+
+要解决深浅拷贝的问题，可以对赋值运算符进行重载
+
+```C++
+class person
+{
+    public:
+        int *m_age;
+    person(int age)//构造函数
+    {
+        m_age = new int(age);//在堆区开辟一块内存
+    }
+    ~person()//析构函数
+    {
+        if(m_age!=NULL)
+        {
+            delete m_age;
+        }
+    }
+    person& operator=(person &p)
+    {
+        if(m_age==NULL)
+        {
+            delete m_age;
+            m_age = NULL;
+        }
+        //要用深拷贝
+        m_age = new int(*p.m_age);//在堆区重新开辟一个区域
+        return *this;
+    }
+};
+```
+
+#### 关系运算符重载
+
+重载关系元算符，判断对象之间的关系
+
+```C++
+bool operator==(person &p)
+        {
+            if(this->m_age==p.m_age&&this->m_name==p.m_name)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+bool operator!=(person &p)
+        {
+            if (this->m_age == p.m_age && this->m_name == p.m_name)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+```
+
+#### 函数调用运算符()
+
+函数调用运算符重载后调用方式很像函数调用，因此被称为**仿函数**。仿函数没有固定的写法。`类名()`
+
+> 函数调用重载可以简单理解是调用函数的快捷指令，可以在（）内填入形参（如果有）
+
+eg
+
+- 打印类型：
+
+```C++
+void operator()()
+        {
+            cout << this->m_age << endl;
+            cout << this->m_name << endl;
+        }
+```
+
+调用函数时
+
+```C++
+person p;
+p();
+```
+
+- 计算类型：
+
+```C++
+int operator()(int num1,int num2)
+        {
+            return num1 + num2;
+        }
+```
+
+调用函数时
+
+```C++
+int res=p1(10, 21);
+```
+
+> 当看见`类型()()`匿名函数对象，`类型()`时匿名对象，使用后自动销毁
+
+### 继承
+
+> 面向对象的三大特性之一
+
+当定义了一个类之后，与下一级的类有共同特性，就可以使用继承减少代码的重复性（比如猫类可以细分各种品种的猫）
+
+继承的语法： `class 子类：继承方式 父类`
+
+> 子类也叫派生类；父类也叫基类
+
+```C++
+class BacePage//基类
+{
+    public:
+        void homepage()
+        {
+            cout << "主页，登陆，注册" << endl;
+        }
+};
+//派生类
+class CPP:public BacePage//继承基类
+{
+    public:
+    void CPP_Page()
+    {
+        cout << "CPP's note" << endl;
+    }
+};
+int main()
+{
+    BacePage BP;
+    CPP cpp;
+    cpp.homepage();
+    cpp.CPP_Page();
+}
+```
+
+ 派生类的成员包含两部分
+
+1. 继承基类的成员
+2. 自己增加的成员
+
+#### 继承方式
+
+> `class 派生类：继承方式 基类`
+
+继承方式：`public公共   protected保护   private私有 `，基类的private权限的成员**一律访问不到**
+
+派生类继承了基类的成员后，存储在派生类的内存中。基类的私有成员也会一并存储到派生类，但是不能被访问。
+
+- public公共权限
+  基类原本是权限设置完整继承下来（该是公共的是公共，该是保护的是保护）
+  基类
+
+  ```c++
+  class father
+  {
+      public:
+          int m_a;
+      protected:
+          int m_b;
+      private:
+          int m_c;
+  };
+  ```
+
+  派生类
+
+  ```c++
+  class son:public father
+  {
+      public:
+          int m_a;
+  
+      protected:
+          int m_b;
+      //m_c无法访问
+  };
+  ```
+
+  
+
+- protected保护
+  基类公共权限和保护权限下的成员都继承为派生类的保护(protected)权限
+
+  ```c++
+  class son:protected father
+  {
+      protected:
+          int m_a;
+          int m_b;
+          // m_c无法访问
+  };
+  ```
+
+- private私有
+  基类公共权限和保护权限下的成员都继承为派生类的私有(private)权限
+
+  ```c++
+  class son:protected father
+  {
+      private:
+          int m_a;
+          int m_b;
+          // m_c无法访问
+  };
+  ```
+
+#### 继承中析构函数和构造函数
+
+- 构造函数
+  基类的先构造函数，然后再调用派生类的构造函数
+- 析构函数
+  派生类先析构，然后基类再析构
 
 
 

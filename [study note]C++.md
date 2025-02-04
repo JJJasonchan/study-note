@@ -470,8 +470,28 @@ int main()
 
 函数的具体知识点与c语言类似
 
-## 指针
+## 特殊函数
 
-> 可以通过指针访问内存
+- **swep交换任何类型的变量**，只要它们支持赋值操作。它是通过引用传递参数的，因此它直接修改传入的变量
 
- 
+eg：
+
+```c++
+#include<iostream>
+#include<string>
+using namespace std;
+int main()
+{
+    string str1 = "jason";
+    int star=0;
+    int end = str1.size()-1;
+    while (end>star)//反转字符串
+    {
+        swap(str1[star], str1[end]);
+        star++;
+        end--;
+    }
+    cout << str1 << endl;
+}
+```
+

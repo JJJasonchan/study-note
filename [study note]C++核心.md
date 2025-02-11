@@ -1395,9 +1395,11 @@ class grandson:public son1,public son2
 
 1. **存在继承关系**。
 
-	2.	**基类有虚函数（**virtual**）**。
+2. **基类有虚函数（**virtual**）**。
 
 3. **通过基类指针或引用操作派生类对象**
+
+**函数重写多态**
 
 ```c++
 #include <iostream>
@@ -1431,3 +1433,68 @@ int main()
 ```
 
 子类成员函数重写基类虚函数后会覆盖从基类继承的虚函数。
+
+**抽象类多态**
+
+通常基类上的函数是不需要实现的。我们可以把它写成虚函数
+
+虚函数语法：`virtual  返回值类型 name (参数列表)=0`
+
+一旦该类存在虚函数，该类属于抽象类
+
+抽象类特点：
+
+1. 不能被实例化
+2. 子类继承后没有重写该函数也会成为抽象类(子类必须重写父类中的虚函数 )
+
+```C++
+#include <iostream>
+#include <string>
+using namespace std;
+class AbstractCalulate//抽象基类
+{
+    public:
+        int m_Num1;
+        int m_Num2;
+        virtual int Result()=0；//虚函数
+};
+class AddCalulate:public AbstractCalulate//加法多态
+{
+    public:
+    int Result()//子类必须重写虚函数
+    {
+        return m_Num1 + m_Num2;
+    }
+};
+class SubCalculate : public AbstractCalulate
+{
+    public:
+    int Result()
+    {
+        return m_Num1 - m_Num2;
+    }
+};
+int main()
+{
+    AbstractCalulate *cal = new AddCalulate;
+    cin >> cal->m_Num1;
+    cin >> cal->m_Num2;
+    cout <<"result is "<< cal->Result() << endl;
+    delete cal;
+}
+```
+
+
+
+**虚析构与纯虚析构**
+
+> 解决父类指针释放子类堆区对象的问题
+
+当子类有属性开辟在堆区，普通的析构函数并不会被调用
+
+此时需要在父类析构函数前加上`virtural`关键字变成**虚析构**
+
+纯虚析构：`virtual ~name()=0;`
+                  `name::~name(){ code  }`
+
+使用纯虚析构，该类为抽象类，不能被实例化
